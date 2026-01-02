@@ -1,565 +1,532 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Mensaje del Momento</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Snake + Mensajes</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-<style>
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0f172a;
-  color: #f8fafc;
-  margin: 0;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-}
+    h1 {
+      margin: 10px 0;
+    }
 
-.container {
-  max-width: 420px;
-  width: 100%;
-  background: #020617;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-}
+    canvas {
+      background: #000;
+      border: 3px solid #0f0;
+    }
 
-.message {
-  font-size: 1.25rem;
-  line-height: 1.5;
-  text-align: center;
-}
+    #info {
+      margin-top: 10px;
+      display: flex;
+      gap: 20px;
+    }
 
-.divider {
-  height: 1px;
-  background: #334155;
-  margin: 20px 0 12px;
-}
+    #mensaje {
+      max-width: 600px;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.1em;
+      line-height: 1.5;
+    }
 
-.meta {
-  text-align: center;
-  font-size: 0.9rem;
-  color: #94a3b8;
-}
-</style>
+    .divider {
+      margin: 10px auto;
+      width: 60%;
+      height: 1px;
+      background: #444;
+    }
+
+    .meta {
+      font-size: 0.85em;
+      color: #aaa;
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
-  <div id="mensaje" class="message"></div>
+
+<h1>🐍 Snake</h1>
+
+<canvas id="game" width="400" height="480"></canvas>
+
+<div id="info">
+  <div>Puntos: <span id="score">0</span></div>
+  <div>Vidas: <span id="lives">3</span></div>
+</div>
+
+<div id="mensaje">
+  <div id="textoMensaje"></div>
   <div class="divider"></div>
-  <div id="meta" class="meta"></div>
+  <div class="meta" id="metaMensaje"></div>
 </div>
 
 <script>
-const mensajes = {
-  "lunes": {
-    "manana": [
-      "Lunes: café cargado, expectativas ligeras.",
-      "Sobrevivir es ganar puntos extra los lunes.",
-      "Hoy el mundo arranca… tú ve a tu ritmo.",
-      "Lunes suave, mente despierta.",
-      "Respira. Ni el lunes es para tanto.",
-      "Modo lunes: activo pero delicado.",
-      "Hoy sí se vale ir lento.",
-      "Si el lunes fuera persona, sería ese amigo que llega sin avisar.",
-      "Arranca con estilo, aunque sea lunes.",
-      "Tú: 1 — Lunes: 0. Sigue así.",
-      "Café primero, decisiones después.",
-      "Lunes con olor a oportunidad… o a sueño.",
-      "Hoy no corras: avanza con intención.",
-      "Que no te gane el lunes, gáname tú a él.",
-      "Si hoy das 10%, ya cuentas como héroe.",
-      "Lunes es solo un tutorial. Lo bueno empieza mañana.",
-      "Hoy no necesitas velocidad, solo constancia.",
-      "Hazlo simple: menos drama, más enfoque.",
-      "Tu energía de lunes puede con todo.",
-      "Pequeño recordatorio: sigues vivo. Con eso basta."
-    ],
-    "tarde": [
-      "Mitad del lunes superada. Felicítate.",
-      "El sueño de la tarde es parte del paquete.",
-      "Hay lunes que parecen tres. Este es uno.",
-      "Ya pasó lo peor… probablemente.",
-      "Si llegaste hasta aquí, ya ganaste.",
-      "Tarde de lunes: oficialmente modo automático.",
-      "No se trabaja: se sobrevive.",
-      "Este lunes pide una siesta por escrito.",
-      "La tarde se siente más amable, ¿o eres tú?",
-      "Todo mejora después de comer. Todo.",
-      "La productividad tomó un descanso… tú no.",
-      "Energía en nivel medio-bajo. Normal.",
-      "No esperes magia un lunes por la tarde.",
-      "Tu paz vale más que tus pendientes.",
-      "Puedes con tu lista. O puedes ignorarla. Ambas valen.",
-      "Lunes por la tarde: momento perfecto para re-negociar con la vida.",
-      "Aún no acaba el día. Pero casi.",
-      "Si necesitas un break, este es el permiso.",
-      "Este lunes ya dio lo que tenía que dar.",
-      "A esta hora, ni el lunes se toma en serio."
-    ],
-    "noche": [
-      "Sobreviviste al lunes. Eso ya es logro.",
-      "Lunes vencido. Sube la dificultad mañana.",
-      "Noche de lunes: mereces paz absoluta.",
-      "Hoy el cansancio es legal.",
-      "Desconecta. Tu cerebro quiere renunciar.",
-      "Cierra el lunes sin remordimientos.",
-      "Recompénsate por existir.",
-      "El lunes no te ganó, solo te cansó.",
-      "No pienses mucho. Es lunes, de noche.",
-      "Hoy duermes como campeón.",
-      "Se vale dormir temprano. Muy temprano.",
-      "Apaga todo. Incluido el drama.",
-      "Mañana no será tan lunes.",
-      "Mereces un respiro largo.",
-      "Fin del lunes: reinicio aceptado.",
-      "Tu cama pidió verte urgentemente.",
-      "Noche de calma: ya diste bastante.",
-      "Lunes completado sin daños permanentes.",
-      "Hoy no necesitas reflexión profunda.",
-      "Lunes cerrado. Buen trabajo."
-    ]
-  },
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
 
-  "martes": {
-    "manana": [
-      "Martes: nivel 2 de la semana.",
-      "El martes ya es más fácil de digerir.",
-      "Hoy estás más despierto que ayer. Tal vez.",
-      "Martes con vibra de ‘ya vamos agarrando paso’.",
-      "Nada mal para un segundo intento.",
-      "Hoy las cosas fluyen mejor.",
-      "Si el lunes no te mató, el martes te recompensa.",
-      "Modo martes: funcional y con estilo.",
-      "Respira: hoy sí sale.",
-      "Tus ideas se sienten más claras.",
-      "Martes: la versión mejorada del lunes.",
-      "Hoy la productividad podría aparecer.",
-      "Pequeños avances, grandes resultados.",
-      "Hoy pintas más motivado. Extraño, pero bien.",
-      "Martes amable para mentes cansadas.",
-      "Tu energía se está reactivando.",
-      "Hoy podrías sorprenderte a ti mismo.",
-      "Martes huele a movimiento.",
-      "Tu ritmo empieza a tomar forma.",
-      "Haz algo que ayer no quisiste."
-    ],
-    "tarde": [
-      "Martes: oficialmente día productivo.",
-      "Esta tarde se siente útil.",
-      "Hoy las cosas sí cooperan.",
-      "Tu enfoque está mejor que ayer.",
-      "Tarde de martes: energía decente.",
-      "Un break estratégico nunca falla.",
-      "Si te estás inspirando, aprovéchalo.",
-      "Martes: buen día para cerrar pendientes.",
-      "Tu cerebro ya entró en calor.",
-      "Esta tarde promete.",
-      "Martes: día subestimado.",
-      "Tu avance hoy cuenta por dos.",
-      "Hoy todo se siente menos caótico.",
-      "Tarde ligera, mente tranquila.",
-      "El martes no te quiere ver sufrir.",
-      "Tu productividad está haciendo esfuerzos reales.",
-      "Todo fluye mejor después del martes mediodía.",
-      "Casi mitad de semana y ya se siente.",
-      "Hoy no estás improvisando. Felicidades.",
-      "Martes a esta hora = momentum."
-    ],
-    "noche": [
-      "Martes: noche para organizar ideas.",
-      "Hoy cierras con más claridad que ayer.",
-      "Noche tranquila y merecida.",
-      "Tu mente está cansada pero orgullosa.",
-      "Hoy avanzaste sin drama.",
-      "Martes cumplido con dignidad.",
-      "Relájate: estás haciendo las cosas bien.",
-      "Noche de martes: perfecta para respirar hondo.",
-      "Hoy sí sumaste.",
-      "Día terminado sin caos: celebración silenciosa.",
-      "Tu checklist sonríe.",
-      "Martes sorprendentemente noble.",
-      "Noche ideal para recargar energía.",
-      "Tu descanso de hoy será de calidad.",
-      "Cierra el día con calma.",
-      "Martes sin estrés: raro pero real.",
-      "Hazle espacio a la tranquilidad.",
-      "Disfruta el silencio que deja el martes.",
-      "Pequeños logros, gran descanso.",
-      "Noche ligera → mañana mejor."
-    ]
-  },
+  const box = 20;
+  const rows = canvas.height / box;
+  const cols = canvas.width / box;
 
-  "miercoles": {
-    "manana": [
-      "Miércoles: punto medio desbloqueado.",
-      "Hoy la semana ya se ve diferente.",
-      "Te lo ganaste: hoy la vibra es mejor.",
-      "Mitad de semana, ánimo de subida.",
-      "Lo difícil ya pasó… en teoría.",
-      "Hoy la energía se siente más amable.",
-      "Miércoles con sabor a avance.",
-      "Ya estás más cerca del viernes que del lunes.",
-      "Hoy la motivación coopera.",
-      "Mañana de miércoles: buen momento para planear.",
-      "Hoy puedes recuperar lo que no hiciste.",
-      "Tu cabeza funciona decente. Aprovecha.",
-      "Miércoles amable: agradece.",
-      "Hoy puedes con todo (o casi).",
-      "Mitad de semana: ajusta el ritmo.",
-      "Energía media pero estable.",
-      "Hoy nadie debería molestarte temprano. Nadie.",
-      "Miércoles no hace daño.",
-      "Hoy huele a productividad real.",
-      "A media semana, todo es más claro."
-    ],
-    "tarde": [
-      "Miércoles: ya no hay vuelta atrás.",
-      "La tarde de miércoles se siente poderosa.",
-      "Tu semana ya tomó forma.",
-      "Hoy podrías cerrar algo importante.",
-      "Tarde ideal para avanzar sin prisa.",
-      "Mitad de semana: enfoque al 70%, suficiente.",
-      "Hoy estás en la zona.",
-      "Tarde estable, mente fina.",
-      "Miércoles cooperativo. Milagro.",
-      "Tu lista de pendientes tiembla.",
-      "Hoy no hay excusas: es miércoles.",
-      "Este es el día para retomar lo ignorado.",
-      "Tarde con buen timing.",
-      "Hoy la semana te sonríe.",
-      "La vida a media semana sabe mejor.",
-      "Tu ritmo está perfecto.",
-      "Miércoles tarde: perfecto equilibrio.",
-      "Hoy no estás improvisando.",
-      "Lo estás haciendo bien, créelo.",
-      "Mitad del camino con estilo."
-    ],
-    "noche": [
-      "Noche de miércoles: ya casi la hiciste.",
-      "Hoy termina con una vibra rara pero buena.",
-      "Relájate: la bajada ya empezó.",
-      "Lo difícil quedó atrás.",
-      "Miércoles cerrando con balance.",
-      "Tu mente pide un descanso suave.",
-      "Hoy sí puedes dormir en paz.",
-      "Noche ideal para planear el remate.",
-      "El jueves ya se asoma.",
-      "Tu semana tomó forma bonita.",
-      "Noche tranquila, mente satisfecha.",
-      "Miércoles completado con éxito.",
-      "Hoy te puedes permitir un gusto.",
-      "La mitad ya pasó. Respira.",
-      "Noche limpia, cero dramas.",
-      "Tu energía baja, pero tu ánimo alto.",
-      "Miércoles casi se siente viernes.",
-      "Hoy ganaste más de lo que crees.",
-      "Duerme bien: te lo ganaste.",
-      "Miércoles cerrado. Buen trabajo."
-    ]
-  },
+  let snake, direction, food, score, lives, game;
 
-  "jueves": {
-    "manana": [
-      "Jueves: el viernes ya huele.",
-      "Hoy la semana empieza a sonreír.",
-      "Ya casi está: aguanta.",
-      "Jueves amable desde temprano.",
-      "La energía vuelve con ganas.",
-      "Mañana de jueves: vibra de ‘ya casi’.",
-      "Hoy todo se siente más ligero.",
-      "Jueves: día de avances silenciosos.",
-      "Tu productividad empieza a emocionar.",
-      "Hoy se antoja cerrar pendientes.",
-      "Modo jueves: elegante y funcional.",
-      "Tu enfoque hoy sí quiere trabajar.",
-      "El jueves te queda bien.",
-      "Hoy despiertas con ritmo decente.",
-      "Faltan horas para la gloria.",
-      "Hoy puedes empujar un poco más.",
-      "Jueves tiene magia de prefiesta.",
-      "Esa sensación bonita es jueves.",
-      "Hoy sí hay motivación.",
-      "Respira: ya casi es viernes."
-    ],
-    "tarde": [
-      "Jueves por la tarde: precalentamiento oficial.",
-      "El ambiente se siente más suave.",
-      "Hoy es el día perfecto para rematar.",
-      "Tu energía está subiendo sin permiso.",
-      "Productividad en fase final.",
-      "Ya huele a fin de semana.",
-      "Tarde feliz, mente ligera.",
-      "Tu checklist empieza a rendirse.",
-      "Jueves con sabor a logro.",
-      "Hoy sí te sientes capaz.",
-      "Tarde lista para cerrar fuerte.",
-      "La presión baja, la vibra sube.",
-      "El jueves tiene buen ritmo.",
-      "Tu semana ya casi está completa.",
-      "Esta tarde te conviene.",
-      "Todo pinta bien… sospechosamente.",
-      "Tarde de jueves: elegante y útil.",
-      "Hoy logras más de lo que crees.",
-      "Aprovecha el mood del jueves.",
-      "Ya casi es tu momento."
-    ],
-    "noche": [
-      "Jueves: oficialmente antesala del viernes.",
-      "Noche con vibra de libertad.",
-      "Hoy puedes relajarte sin culpa.",
-      "La euforia previa ya se siente.",
-      "Noche liviana y con estilo.",
-      "Un pasito más y es viernes.",
-      "Dormir hoy se siente como victoria.",
-      "Noche para cerrar pendientes simples.",
-      "Tu mente ya entró en modo fin de semana.",
-      "Jueves cierre: elegante y tranquilo.",
-      "La emoción de mañana ya está aquí.",
-      "Hoy descansas con sonrisa.",
-      "Noche de jueves: casi fiesta.",
-      "Plan simple, energía suave.",
-      "Hoy mereces calma.",
-      "Noche livianita, corazón contento.",
-      "Disfruta el descanso previo.",
-      "Jueves cumplido con honor.",
-      "Tu semana va mejor de lo que piensas.",
-      "Prepárate: mañana brillas."
-    ]
-  },
-
-  "viernes": {
-    "manana": [
-      "Viernes: el universo aprueba tu ánimo.",
-      "Hoy todo se siente más fácil.",
-      "Llegó el día bueno.",
-      "Mañana de viernes: pura vibra positiva.",
-      "Hoy la vida es menos seria.",
-      "Tu humor mejoró mágicamente.",
-      "Viernes temprano ya es motivo suficiente.",
-      "Ya casi empieza lo bueno.",
-      "Hoy puedes sonreír sin razón.",
-      "Tu semana está a punto de graduarse.",
-      "Viernes: todo fluye, nada influye.",
-      "Hoy es día de cerrar brillante.",
-      "Te ves más motivado y se nota.",
-      "Viernes es terapia.",
-      "Hoy te levantas en modo ganador.",
-      "Tu paz hoy es prioridad.",
-      "Viernes: día premium.",
-      "Hoy nada te detiene.",
-      "El mood de hoy es imparable.",
-      "Ya huele a libertad."
-    ],
-    "tarde": [
-      "Viernes tarde: oficialmente modo fiesta.",
-      "A esta hora ya nadie trabaja de verdad.",
-      "Es viernes, no te estreses.",
-      "El cuerpo lo sabe.",
-      "Tarde con vibra épica.",
-      "Plan o no plan, ya ganaste.",
-      "Tu productividad bajó. Normal.",
-      "Viernes tarde: la emoción es real.",
-      "Se siente cerca la diversión.",
-      "Tu sonrisa confirma el día.",
-      "Hoy cualquier plan suena bien.",
-      "Viernes no vino a complicarte.",
-      "El fin de semana ya te guiña.",
-      "Energía alta, estrés bajo.",
-      "Todo se siente más posible.",
-      "Tarde brillante con poca responsabilidad.",
-      "Hoy se vale ser ligero.",
-      "Viernes te queda perfecto.",
-      "Son las horas felices del viernes.",
-      "Hoy fluye sin esfuerzo."
-    ],
-    "noche": [
-      "La fiesta llama… ¿vas a contestar?",
-      "Viernes noche: modo legendario ON.",
-      "Hoy se hacen historias, no planes.",
-      "Noche con ADN de fiesta.",
-      "Hoy nadie se salva de pasarlo bien.",
-      "Viernes: la noche más honesta.",
-      "Tu energía hoy es otra liga.",
-      "La calle te está llamando.",
-      "Hoy brillas sin esfuerzo.",
-      "Es viernes. No necesitas más explicación.",
-      "La noche te queda corta.",
-      "Plan o improvisación: todo funciona.",
-      "Viernes lleno de posibilidades.",
-      "La vibra nocturna está premium.",
-      "Hoy el mundo se siente tuyo.",
-      "La música suena mejor en viernes.",
-      "Que esta noche cuente.",
-      "El mood habla por ti.",
-      "Viernes: la vida en HD.",
-      "Esta noche trae magia."
-    ]
-  },
-
-  "sabado": {
-    "manana": [
-      "Sábado: el único día que despierta de buenas.",
-      "Hoy se vale todo, menos estresarse.",
-      "El tiempo corre lento, disfruta.",
-      "Mañana libre, mente libre.",
-      "Tu paz está en su mejor versión.",
-      "Hoy todo es opcional.",
-      "Sábado: suave y elegante.",
-      "No hay prisa. Nunca.",
-      "Tu descanso hoy es sagrado.",
-      "Haz algo bonito o no hagas nada.",
-      "Sábado: día premium sin esfuerzo.",
-      "Hoy no existe el caos.",
-      "Tómalo con calma. Mucha calma.",
-      "Hoy el mundo no molesta.",
-      "Mañana perfecta para recargar.",
-      "Sábado sabe a libertad.",
-      "Hoy eres dueño de tu ritmo.",
-      "Despierta sin urgencias.",
-      "Sábado es paz en formato día.",
-      "Tú pones las reglas."
-    ],
-    "tarde": [
-      "Sábado tarde: todo se siente más bonito.",
-      "Plan ligero, mente ligera.",
-      "Tiempo libre nivel experto.",
-      "Hoy te mereces algo bueno.",
-      "Nunca subestimes una tarde de sábado.",
-      "Es hora de disfrutar sin prisa.",
-      "Hoy el sol cae lento.",
-      "Sábado: vibra deliciosa.",
-      "Haz lo que quieras, literal.",
-      "Tu mood está en su punto.",
-      "Tarde para existir suavemente.",
-      "Hoy no se corre, se flota.",
-      "Sábado suavecito.",
-      "Haz memoria: por esto esperas la semana.",
-      "Plan o no plan: sábado siempre gana.",
-      "El día más amable de la semana.",
-      "Tarde perfecta para desconectar.",
-      "Tu paz está en modo turbo.",
-      "Hoy todo fluye hermoso.",
-      "Disfruta el momento que te tocó."
-    ],
-    "noche": [
-      "Sábado noche: vibra alta, cero reglas.",
-      "Esta noche es territorio libre.",
-      "Hoy el plan eres tú.",
-      "Noche para brillar sin motivo.",
-      "Haz que esta noche tenga sentido.",
-      "Sábado se inventó para esto.",
-      "La energía sube por default.",
-      "Hoy la ciudad se ve diferente.",
-      "Noche de historias nuevas.",
-      "Tu mood está en modo nocturno premium.",
-      "Sábado: la vida sin complicaciones.",
-      "La noche es tu aliada.",
-      "Hoy no se planea, se vive.",
-      "Las mejores ideas salen en sábado.",
-      "Noche suave con toque épico.",
-      "La vibra nocturna está deliciosa.",
-      "Haz algo memorables hoy.",
-      "Sábado noche no perdona aburridos.",
-      "Sonríe: esta noche es tuya.",
-      "La luna del sábado siempre brilla más."
-    ]
-  },
-
-  "domingo": {
-    "manana": [
-      "Domingo: el día más honesto.",
-      "Hoy todo es lento y hermoso.",
-      "Domingo suave, alma ligera.",
-      "Hazlo sencillo: respira y descansa.",
-      "Hoy no hay urgencias.",
-      "Tu energía está en modo contemplativo.",
-      "Domingo: cero complicaciones.",
-      "Despierta con calma, no pasa nada.",
-      "Hoy el tiempo se estira.",
-      "Domingo: terapia gratuita.",
-      "Tu mañana está hecha de paz.",
-      "Hoy tu única obligación es existir.",
-      "Domingo perfecto para silencio.",
-      "Respira profundo: es domingo.",
-      "Hoy se vale despertar tarde.",
-      "Domingo no juzga.",
-      "Tu descanso hoy es prioridad absoluta.",
-      "Una mañana sin pendientes sabe mejor.",
-      "Domingo: mood introspectivo premium.",
-      "Haz de este día algo suave."
-    ],
-    "tarde": [
-      "Domingo tarde: punto exacto entre paz y nostalgia.",
-      "El sol cae lento, igual que tú.",
-      "Descanso profesional.",
-      "Hoy todo tiene un filtro más cálido.",
-      "Domingo: vibra contemplativa.",
-      "Tarde perfecta para recargar lo emocional.",
-      "No hagas mucho. No hace falta.",
-      "Domingo te abraza, tómalo.",
-      "Tu mente necesita este respiro.",
-      "Tarde de pausa obligatoria.",
-      "El mundo se siente más suave hoy.",
-      "Domingo: día de mantenimiento emocional.",
-      "Haz algo que te haga bien.",
-      "Tarde tranquila, alma contenta.",
-      "Domingo nunca corre.",
-      "Tu paz hoy manda.",
-      "Disfruta lo que queda del fin.",
-      "Domingo tarde: casi arte.",
-      "Quizá no haces nada, y está bien.",
-      "El descanso también cuenta como logro."
-    ],
-    "noche": [
-      "Respira. Mañana empieza otra vez.",
-      "Noche de domingo: pensamiento profundo incluido.",
-      "Hoy el silencio pesa bonito.",
-      "Desconecta antes de que llegue el lunes.",
-      "Tu descanso hoy define tu semana.",
-      "Domingo noche: ritual obligatorio.",
-      "Hora de bajar revoluciones.",
-      "El lunes ya vio que te estás preparando.",
-      "Noche suave, mente alerta.",
-      "Domingo es nostalgia con buen gusto.",
-      "Esta noche sé amable contigo.",
-      "Ve cerrando ciclos con calma.",
-      "Domingo noche no muerde.",
-      "Un té, una idea y a dormir.",
-      "Hoy mereces una pausa larga.",
-      "Domingo cerrando con elegancia.",
-      "Tu cuerpo pide descanso. Escúchalo.",
-      "Esta noche se hizo para ordenar mentalmente.",
-      "El final del domingo también tiene magia.",
-      "Apaga todo. Mañana recomienza."
-    ]
+  function resetGame(fullReset = false) {
+    snake = [{ x: 9 * box, y: 10 * box }];
+    direction = "RIGHT";
+    food = spawnFood();
+    if (fullReset) {
+      score = 0;
+      lives = 3;
+    }
   }
-};
 
-function obtenerMomento(hora) {
-  if (hora >= 5 && hora < 12) return "manana";
-  if (hora >= 12 && hora < 19) return "tarde";
-  return "noche";
-}
+  function spawnFood() {
+    return {
+      x: Math.floor(Math.random() * cols) * box,
+      y: Math.floor(Math.random() * rows) * box
+    };
+  }
 
-function capitalizar(texto) {
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
-}
+  document.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+    if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+    if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+    if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+  });
 
-const ahora = new Date();
-const dias = ["domingo","lunes","martes","miercoles","jueves","viernes","sabado"];
+  function draw() {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-const dia = dias[ahora.getDay()];
-const momento = obtenerMomento(ahora.getHours());
+    for (let i = 0; i < snake.length; i++) {
+      ctx.fillStyle = i === 0 ? "#0f0" : "#0a0";
+      ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    }
 
-const lista = mensajes[dia][momento];
-const mensaje = lista[Math.floor(Math.random() * lista.length)];
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
 
-document.getElementById("mensaje").textContent = mensaje;
-document.getElementById("meta").textContent =
-  `${capitalizar(dia)} · ${capitalizar(momento)}`;
+    let headX = snake[0].x;
+    let headY = snake[0].y;
+
+    if (direction === "UP") headY -= box;
+    if (direction === "DOWN") headY += box;
+    if (direction === "LEFT") headX -= box;
+    if (direction === "RIGHT") headX += box;
+
+    if (
+      headX < 0 || headY < 0 ||
+      headX >= canvas.width || headY >= canvas.height ||
+      snake.some((s, i) => i !== 0 && s.x === headX && s.y === headY)
+    ) {
+      lives--;
+      document.getElementById("lives").textContent = lives;
+
+      if (lives <= 0) {
+        clearInterval(game);
+        alert("Game Over 😢");
+        resetGame(true);
+        game = setInterval(draw, 120);
+        return;
+      } else {
+        resetGame();
+        return;
+      }
+    }
+
+    if (headX === food.x && headY === food.y) {
+      score++;
+      document.getElementById("score").textContent = score;
+      food = spawnFood();
+      mostrarMensaje();
+    } else {
+      snake.pop();
+    }
+
+    snake.unshift({ x: headX, y: headY });
+  }
+
+  resetGame(true);
+  document.getElementById("score").textContent = score;
+  document.getElementById("lives").textContent = lives;
+  game = setInterval(draw, 120);
+  const mensajes = {
+    "lunes": {
+      "manana": [
+        "Lunes: café cargado, expectativas ligeras.",
+        "Sobrevivir es ganar puntos extra los lunes.",
+        "Hoy el mundo arranca… tú ve a tu ritmo.",
+        "Lunes suave, mente despierta.",
+        "Respira. Ni el lunes es para tanto.",
+        "Modo lunes: activo pero delicado.",
+        "Hoy sí se vale ir lento.",
+        "Si el lunes fuera persona, sería ese amigo que llega sin avisar.",
+        "Arranca con estilo, aunque sea lunes.",
+        "Tú: 1 — Lunes: 0. Sigue así.",
+        "Café primero, decisiones después.",
+        "Lunes con olor a oportunidad… o a sueño.",
+        "Hoy no corras: avanza con intención.",
+        "Que no te gane el lunes, gáname tú a él.",
+        "Si hoy das 10%, ya cuentas como héroe.",
+        "Lunes es solo un tutorial. Lo bueno empieza mañana.",
+        "Hoy no necesitas velocidad, solo constancia.",
+        "Hazlo simple: menos drama, más enfoque.",
+        "Tu energía de lunes puede con todo.",
+        "Pequeño recordatorio: sigues vivo. Con eso basta."
+      ],
+      "tarde": [
+        "Mitad del lunes superada. Felicítate.",
+        "El sueño de la tarde es parte del paquete.",
+        "Hay lunes que parecen tres. Este es uno.",
+        "Ya pasó lo peor… probablemente.",
+        "Si llegaste hasta aquí, ya ganaste.",
+        "Tarde de lunes: oficialmente modo automático.",
+        "No se trabaja: se sobrevive.",
+        "Este lunes pide una siesta por escrito.",
+        "La tarde se siente más amable, ¿o eres tú?",
+        "Todo mejora después de comer. Todo.",
+        "La productividad tomó un descanso… tú no.",
+        "Energía en nivel medio-bajo. Normal.",
+        "No esperes magia un lunes por la tarde.",
+        "Tu paz vale más que tus pendientes.",
+        "Puedes con tu lista. O puedes ignorarla. Ambas valen.",
+        "Lunes por la tarde: momento perfecto para re-negociar con la vida.",
+        "Aún no acaba el día. Pero casi.",
+        "Si necesitas un break, este es el permiso.",
+        "Este lunes ya dio lo que tenía que dar.",
+        "A esta hora, ni el lunes se toma en serio."
+      ],
+      "noche": [
+        "Sobreviviste al lunes. Eso ya es logro.",
+        "Lunes vencido. Sube la dificultad mañana.",
+        "Noche de lunes: mereces paz absoluta.",
+        "Hoy el cansancio es legal.",
+        "Desconecta. Tu cerebro quiere renunciar.",
+        "Cierra el lunes sin remordimientos.",
+        "Recompénsate por existir.",
+        "El lunes no te ganó, solo te cansó.",
+        "No pienses mucho. Es lunes, de noche.",
+        "Hoy duermes como campeón.",
+        "Se vale dormir temprano. Muy temprano.",
+        "Apaga todo. Incluido el drama.",
+        "Mañana no será tan lunes.",
+        "Mereces un respiro largo.",
+        "Fin del lunes: reinicio aceptado.",
+        "Tu cama pidió verte urgentemente.",
+        "Noche de calma: ya diste bastante.",
+        "Lunes completado sin daños permanentes.",
+        "Hoy no necesitas reflexión profunda.",
+        "Lunes cerrado. Buen trabajo."
+      ]
+    },
+
+    "martes": {
+      "manana": [
+        "Martes: nivel 2 de la semana.",
+        "El martes ya es más fácil de digerir.",
+        "Hoy estás más despierto que ayer. Tal vez.",
+        "Martes con vibra de ‘ya vamos agarrando paso’.",
+        "Nada mal para un segundo intento.",
+        "Hoy las cosas fluyen mejor.",
+        "Si el lunes no te mató, el martes te recompensa.",
+        "Modo martes: funcional y con estilo.",
+        "Respira: hoy sí sale.",
+        "Tus ideas se sienten más claras.",
+        "Martes: la versión mejorada del lunes.",
+        "Hoy la productividad podría aparecer.",
+        "Pequeños avances, grandes resultados.",
+        "Hoy pintas más motivado. Extraño, pero bien.",
+        "Martes amable para mentes cansadas.",
+        "Tu energía se está reactivando.",
+        "Hoy podrías sorprenderte a ti mismo.",
+        "Martes huele a movimiento.",
+        "Tu ritmo empieza a tomar forma.",
+        "Haz algo que ayer no quisiste."
+      ],
+      "tarde": [
+        "Martes: oficialmente día productivo.",
+        "Esta tarde se siente útil.",
+        "Hoy las cosas sí cooperan.",
+        "Tu enfoque está mejor que ayer.",
+        "Tarde de martes: energía decente.",
+        "Un break estratégico nunca falla.",
+        "Si te estás inspirando, aprovéchalo.",
+        "Martes: buen día para cerrar pendientes.",
+        "Tu cerebro ya entró en calor.",
+        "Esta tarde promete.",
+        "Martes: día subestimado.",
+        "Tu avance hoy cuenta por dos.",
+        "Hoy todo se siente menos caótico.",
+        "Tarde ligera, mente tranquila.",
+        "El martes no te quiere ver sufrir.",
+        "Tu productividad está haciendo esfuerzos reales.",
+        "Todo fluye mejor después del martes mediodía.",
+        "Casi mitad de semana y ya se siente.",
+        "Hoy no estás improvisando. Felicidades.",
+        "Martes a esta hora = momentum."
+      ],
+      "noche": [
+        "Martes: noche para organizar ideas.",
+        "Hoy cierras con más claridad que ayer.",
+        "Noche tranquila y merecida.",
+        "Tu mente está cansada pero orgullosa.",
+        "Hoy avanzaste sin drama.",
+        "Martes cumplido con dignidad.",
+        "Relájate: estás haciendo las cosas bien.",
+        "Noche de martes: perfecta para respirar hondo.",
+        "Hoy sí sumaste.",
+        "Día terminado sin caos: celebración silenciosa.",
+        "Tu checklist sonríe.",
+        "Martes sorprendentemente noble.",
+        "Noche ideal para recargar energía.",
+        "Tu descanso de hoy será de calidad.",
+        "Cierra el día con calma.",
+        "Martes sin estrés: raro pero real.",
+        "Hazle espacio a la tranquilidad.",
+        "Disfruta el silencio que deja el martes.",
+        "Pequeños logros, gran descanso.",
+        "Noche ligera → mañana mejor."
+      ]
+    },
+
+    "miercoles": {
+      "manana": [
+        "Miércoles: punto medio desbloqueado.",
+        "Hoy la semana ya se ve diferente.",
+        "Te lo ganaste: hoy la vibra es mejor.",
+        "Mitad de semana, ánimo de subida.",
+        "Lo difícil ya pasó… en teoría.",
+        "Hoy la energía se siente más amable.",
+        "Miércoles con sabor a avance.",
+        "Ya estás más cerca del viernes que del lunes.",
+        "Hoy la motivación coopera.",
+        "Mañana de miércoles: buen momento para planear.",
+        "Hoy puedes recuperar lo que no hiciste.",
+        "Tu cabeza funciona decente. Aprovecha.",
+        "Miércoles amable: agradece.",
+        "Hoy puedes con todo (o casi).",
+        "Mitad de semana: ajusta el ritmo.",
+        "Energía media pero estable.",
+        "Hoy nadie debería molestarte temprano. Nadie.",
+        "Miércoles no hace daño.",
+        "Hoy huele a productividad real.",
+        "A media semana, todo es más claro."
+      ],
+      "tarde": [
+        "Miércoles: ya no hay vuelta atrás.",
+        "La tarde de miércoles se siente poderosa.",
+        "Tu semana ya tomó forma.",
+        "Hoy podrías cerrar algo importante.",
+        "Tarde ideal para avanzar sin prisa.",
+        "Mitad de semana: enfoque al 70%, suficiente.",
+        "Hoy estás en la zona.",
+        "Tarde estable, mente fina.",
+        "Miércoles cooperativo. Milagro.",
+        "Tu lista de pendientes tiembla.",
+        "Hoy no hay excusas: es miércoles.",
+        "Este es el día para retomar lo ignorado.",
+        "Tarde con buen timing.",
+        "Hoy la semana te sonríe.",
+        "La vida a media semana sabe mejor.",
+        "Tu ritmo está perfecto.",
+        "Miércoles tarde: perfecto equilibrio.",
+        "Hoy no estás improvisando.",
+        "Lo estás haciendo bien, créelo.",
+        "Mitad del camino con estilo."
+      ],
+      "noche": [
+        "Noche de miércoles: ya casi la hiciste.",
+        "Hoy termina con una vibra rara pero buena.",
+        "Relájate: la bajada ya empezó.",
+        "Lo difícil quedó atrás.",
+        "Miércoles cerrando con balance.",
+        "Tu mente pide un descanso suave.",
+        "Hoy sí puedes dormir en paz.",
+        "Noche ideal para planear el remate.",
+        "El jueves ya se asoma.",
+        "Tu semana tomó forma bonita.",
+        "Noche tranquila, mente satisfecha.",
+        "Miércoles completado con éxito.",
+        "Hoy te puedes permitir un gusto.",
+        "La mitad ya pasó. Respira.",
+        "Noche limpia, cero dramas.",
+        "Tu energía baja, pero tu ánimo alto.",
+        "Miércoles casi se siente viernes.",
+        "Hoy ganaste más de lo que crees.",
+        "Duerme bien: te lo ganaste.",
+        "Miércoles cerrado. Buen trabajo."
+      ]
+    },
+
+    "jueves": {
+      "manana": [
+        "Jueves: el viernes ya huele.",
+        "Hoy la semana empieza a sonreír.",
+        "Ya casi está: aguanta.",
+        "Jueves amable desde temprano.",
+        "La energía vuelve con ganas.",
+        "Mañana de jueves: vibra de ‘ya casi’.",
+        "Hoy todo se siente más ligero.",
+        "Jueves: día de avances silenciosos.",
+        "Tu productividad empieza a emocionar.",
+        "Hoy se antoja cerrar pendientes.",
+        "Modo jueves: elegante y funcional.",
+        "Tu enfoque hoy sí quiere trabajar.",
+        "El jueves te queda bien.",
+        "Hoy despiertas con ritmo decente.",
+        "Faltan horas para la gloria.",
+        "Hoy puedes empujar un poco más.",
+        "Jueves tiene magia de prefiesta.",
+        "Esa sensación bonita es jueves.",
+        "Hoy sí hay motivación.",
+        "Respira: ya casi es viernes."
+      ],
+      "tarde": [
+        "Jueves por la tarde: precalentamiento oficial.",
+        "El ambiente se siente más suave.",
+        "Hoy es el día perfecto para rematar.",
+        "Tu energía está subiendo sin permiso.",
+        "Productividad en fase final.",
+        "Ya huele a fin de semana.",
+        "Tarde feliz, mente ligera.",
+        "Tu checklist empieza a rendirse.",
+        "Jueves con sabor a logro.",
+        "Hoy sí te sientes capaz.",
+        "Tarde lista para cerrar fuerte.",
+        "La presión baja, la vibra sube.",
+        "El jueves tiene buen ritmo.",
+        "Tu semana ya casi está completa.",
+        "Esta tarde te conviene.",
+        "Todo pinta bien… sospechosamente.",
+        "Tarde de jueves: elegante y útil.",
+        "Hoy logras más de lo que crees.",
+        "Aprovecha el mood del jueves.",
+        "Ya casi es tu momento."
+      ],
+      "noche": [
+        "Jueves: oficialmente antesala del viernes.",
+        "Noche con vibra de libertad.",
+        "Hoy puedes relajarte sin culpa.",
+        "La euforia previa ya se siente.",
+        "Noche liviana y con estilo.",
+        "Un pasito más y es viernes.",
+        "Dormir hoy se siente como victoria.",
+        "Noche para cerrar pendientes simples.",
+        "Tu mente ya entró en modo fin de semana.",
+        "Jueves cierre: elegante y tranquilo.",
+        "La emoción de mañana ya está aquí.",
+        "Hoy descansas con sonrisa.",
+        "Noche de jueves: casi fiesta.",
+        "Plan simple, energía suave.",
+        "Hoy mereces calma.",
+        "Noche livianita, corazón contento.",
+        "Disfruta el descanso previo.",
+        "Jueves cumplido con honor.",
+        "Tu semana va mejor de lo que piensas.",
+        "Prepárate: mañana brillas."
+      ]
+    },
+
+    "viernes": {
+      "manana": [
+        "Viernes: el universo aprueba tu ánimo.",
+        "Hoy todo se siente más fácil.",
+        "Llegó el día bueno.",
+        "Mañana de viernes: pura vibra positiva.",
+        "Hoy la vida es menos seria.",
+        "Tu humor mejoró mágicamente.",
+        "Viernes temprano ya es motivo suficiente.",
+        "Ya casi empieza lo bueno.",
+        "Hoy puedes sonreír sin razón.",
+        "Tu semana está a punto de graduarse.",
+        "Viernes: todo fluye, nada influye.",
+        "Hoy es día de cerrar brillante.",
+        "Te ves más motivado y se nota.",
+        "Viernes es terapia.",
+        "Hoy te levantas en modo ganador.",
+        "Tu paz hoy es prioridad.",
+        "Viernes: día premium.",
+        "Hoy nada te detiene.",
+        "El mood de hoy es imparable.",
+        "Ya huele a libertad."
+      ],
+      "tarde": [
+        "Viernes tarde: oficialmente modo fiesta.",
+        "A esta hora ya nadie trabaja de verdad.",
+        "Es viernes, no te estreses.",
+        "El cuerpo lo sabe.",
+        "Tarde con vibra épica.",
+        "Plan o no plan, ya ganaste.",
+        "Tu productividad bajó. Normal.",
+        "Viernes tarde: la emoción es real.",
+        "Se siente cerca la diversión.",
+        "Tu sonrisa confirma el día.",
+        "Hoy cualquier plan suena bien.",
+        "Viernes no vino a complicarte.",
+        "El fin de semana ya te guiña.",
+        "Energía alta, estrés bajo.",
+        "Todo se siente más posible.",
+        "Tarde brillante con poca responsabilidad.",
+        "Hoy se vale ser ligero.",
+        "Viernes te queda perfecto.",
+        "Son las horas felices del viernes.",
+        "Hoy fluye sin esfuerzo."
+      ],
+      "noche": [
+        "La fiesta llama… ¿vas a contestar?",
+        "Viernes noche: modo legendario ON.",
+        "Hoy se hacen historias, no planes.",
+        "Noche con ADN de fiesta.",
+        "Hoy nadie se salva de pasarlo bien.",
+        "Viernes: la noche más honesta.",
+        "Tu energía hoy es otra liga.",
+        "La calle te está llamando.",
+        "Hoy brillas sin esfuerzo.",
+        "Es viernes. No necesitas más explicación.",
+        "La noche te queda corta.",
+        "Plan o improvisación: todo funciona.",
+        "Viernes lleno de posibilidades.",
+        "La vibra nocturna está premium.",
+        "Hoy el mundo se siente tuyo.",
+        "La música suena mejor en viernes.",
+        "Que esta noche cuente.",
+        "El mood habla por ti.",
+        "Viernes: la vida en HD.",
+        "Esta noche trae magia."
+      ]
+    }
+  };
+
+  function obtenerMomento(hora) {
+    if (hora >= 6 && hora < 12) return "manana";
+    if (hora >= 12 && hora < 18) return "tarde";
+    return "noche";
+  }
+
+  function mostrarMensaje() {
+    const ahora = new Date();
+    const dias = ["domingo","lunes","martes","miercoles","jueves","viernes","sabado"];
+    const dia = dias[ahora.getDay()];
+    const momento = obtenerMomento(ahora.getHours());
+
+    const lista = mensajes[dia][momento];
+    const texto = lista[Math.floor(Math.random() * lista.length)];
+
+    document.getElementById("mensaje").innerHTML = `
+      <div>${texto}</div>
+      <hr>
+      <small>${dia.toUpperCase()} · ${momento.toUpperCase()}</small>
+    `;
+  }
+
+  mostrarMensaje();
 </script>
 
 </body>
